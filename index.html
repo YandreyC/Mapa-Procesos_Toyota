@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Procesos Toyota - Completo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --t-red: #eb0a1e;
+            --t-black: #1a1a1a;
+            --t-grey: #58595b;
+            --t-white: #ffffff;
+            --t-blue: #004085; /* Color para operativos */
+            --t-green: #28a745; /* Color para soporte */
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        h1 {
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 40px;
+            color: var(--t-black);
+            font-size: 2.2rem;
+        }
+
+        .chart-box {
+            position: relative;
+            width: 550px;
+            height: 550px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+        }
+
+        svg { width: 92%; height: 92%; }
+
+        .segment {
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            stroke: #ffffff;
+            stroke-width: 1.5;
+        }
+
+        .segment:hover {
+            opacity: 0.95;
+            filter: brightness(1.2);
+            transform: scale(1.02);
+            transform-origin: center;
+        }
+
+        .svg-label {
+            fill: white;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            font-size: 4.2px;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            pointer-events: none;
+            text-transform: uppercase;
+            filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.5));
+            letter-spacing: 0.3px;
+        }
+
+        .center-hub {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .center-hub img { width: 90px; }
+
+        /* Modal con Scroll */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            padding: 40px;
+            border-radius: 25px;
+            position: relative;
+            overflow-y: auto;
+            animation: modalPop 0.3s ease-out;
+        }
+
+        @keyframes modalPop {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #999; }
+        
+        .modal h2 { font-family: 'Oswald'; margin: 0 0 25px; font-size: 1.8rem; border-bottom: 3px solid; padding-bottom: 10px; }
+        
+        .section-block { margin-bottom: 25px; }
+        .section-block h3 { color: #333; font-size: 1.1rem; margin-bottom: 10px; display: flex; align-items: center; }
+        .section-block h3 span { background: #eee; border-radius: 50%; width: 25px; height: 25px; display: inline-flex; justify-content: center; align-items: center; margin-right: 10px; font-size: 0.8rem; }
+
+        .info-row { margin-left: 35px; margin-bottom: 15px; padding-left: 15px; border-left: 2px solid #eee; }
+        .info-row strong { display: block; color: var(--t-black); font-size: 0.95rem; }
+        .info-row p { margin: 4px 0 0; font-size: 0.85rem; color: #666; line-height: 1.4; }
+
+        /* Colores dinámicos del modal */
+        .modal.estrat h2 { color: var(--t-red); border-color: var(--t-red); }
+        .modal.oper h2 { color: #0056b3; border-color: #0056b3; }
+        .modal.soporte h2 { color: #218838; border-color: #218838; }
+
+    </style>
+</head>
+<body>
+
+    <h1>Mapa de Procesos</h1>
+
+    <div class="chart-box">
+        <svg viewBox="0 0 100 100">
+            <path class="segment" fill="#eb0a1e" onclick="openModal('estrat')" 
+                d="M50,50 L93.3,25 A50,50 0 0,0 6.7,25 Z" />
+            
+            <path class="segment" fill="#58595b" onclick="openModal('oper')" 
+                d="M50,50 L93.3,25 A50,50 0 0,1 50,100 Z" />
+            
+            <path class="segment" fill="#1a1a1a" onclick="openModal('soporte')" 
+                d="M50,50 L50,100 A50,50 0 0,1 6.7,25 Z" />
+
+            <text class="svg-label" x="50" y="24">Estratégicos</text>
+            <text class="svg-label" x="73" y="63">Operativos</text>
+            <text class="svg-label" x="27" y="63">De Soporte</text>
+        </svg>
+
+        <div class="center-hub">
+            <img src="Logo Toyota.jpg" alt="Toyota Logo">
+        </div>
+    </div>
+
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const content = {
+            estrat: {
+                class: "estrat",
+                title: "Procesos Estratégicos",
+                sections: [
+                    { id: "1", name: "Planificación estratégica", items: [
+                        { t: "Análisis del mercado automotriz", d: "Estudio de tendencias, competencia y necesidades del cliente." },
+                        { t: "Desarrollo de nuevos modelos", d: "Diseño e innovación según demanda y avances tecnológicos." },
+                        { t: "Definición de objetivos corporativos", d: "Metas de producción, ventas y crecimiento global." }
+                    ]},
+                    { id: "2", name: "Marketing", items: [
+                        { t: "Investigación de mercado", d: "Análisis del comportamiento del consumidor." },
+                        { t: "Estrategias de posicionamiento", d: "Definición de la imagen de marca." },
+                        { t: "Gestión de concesionarios", d: "Coordinación de puntos de venta autorizados." }
+                    ]},
+                    { id: "3", name: "Gestión de calidad y mejora continua", items: [
+                        { t: "Control de calidad", d: "Supervisión constante para evitar defectos." },
+                        { t: "Aplicación de Kaizen", d: "Mejora continua mediante pequeños cambios." },
+                        { t: "Análisis de causa raíz (5 porqués)", d: "Identificar el origen real de un problema." }
+                    ]}
+                ]
+            },
+            oper: {
+                class: "oper",
+                title: "Procesos Operativos (Clave)",
+                sections: [
+                    { id: "4", name: "Recepción de materiales", items: [
+                        { t: "Evaluación de proveedores", d: "Selección de aliados confiables y certificados." },
+                        { t: "Inspección de insumos", d: "Revisión de piezas antes de ingresar a producción." },
+                        { t: "Registro e inventario", d: "Control y trazabilidad de materiales." }
+                    ]},
+                    { id: "5", name: "Ubicación de materiales", items: [
+                        { t: "Clasificación de piezas", d: "Organización según tipo y uso." },
+                        { t: "Sistema Just in Time (JIT)", d: "Entrega exacta cuando se necesitan." },
+                        { t: "Control de stock mínimo", d: "Evitar escasez o exceso de inventario." }
+                    ]},
+                    { id: "6", name: "Producción", items: [
+                        { t: "Ensamblaje chasis y motor", d: "Unión estructural principal del vehículo." },
+                        { t: "Componentes electrónicos", d: "Instalación de sistemas tecnológicos." },
+                        { t: "Pruebas técnicas", d: "Evaluaciones de seguridad y funcionamiento." }
+                    ]},
+                    { id: "7", name: "Expedición de pedidos", items: [
+                        { t: "Inspección final", d: "Revisión completa del vehículo terminado." },
+                        { t: "Distribución", d: "Transporte seguro a concesionarios." },
+                        { t: "Seguimiento logístico", d: "Control hasta el destino final." }
+                    ]}
+                ]
+            },
+            soporte: {
+                class: "soporte",
+                title: "Procesos de Soporte",
+                sections: [
+                    { id: "8", name: "Mantenimiento", items: [
+                        { t: "Preventivo y Correctivo", d: "Revisión periódica y reparación de equipos." },
+                        { t: "Líneas robotizadas", d: "Control de sistemas automatizados." }
+                    ]},
+                    { id: "9", name: "Gestión de personas (RRHH)", items: [
+                        { t: "Reclutamiento y Selección", d: "Contratación de personal calificado." },
+                        { t: "Capacitación TPS", d: "Formación en el Sistema de Producción Toyota." }
+                    ]},
+                    { id: "10", name: "Gestión financiera", items: [
+                        { t: "Control de costos", d: "Supervisión de gastos y rentabilidad." },
+                        { t: "Presupuesto y Análisis", d: "Planificación y evaluación económica." }
+                    ]},
+                    { id: "11", name: "Gestión de información", items: [
+                        { t: "Sistema ERP", d: "Gestión digital de datos empresariales." },
+                        { t: "Seguridad Informática", d: "Protección de datos corporativos." }
+                    ]},
+                    { id: "12", name: "Gestión medioambiental", items: [
+                        { t: "Control de emisiones", d: "Reducción de contaminación industrial." },
+                        { t: "Uso eficiente de energía", d: "Optimización del consumo." }
+                    ]},
+                    { id: "13", name: "Atención al cliente", items: [
+                        { t: "Garantías y Postventa", d: "Soporte después de la compra." },
+                        { t: "Gestión de reclamos", d: "Solución de quejas y satisfacción." }
+                    ]}
+                ]
+            }
+        };
+
+        function openModal(type) {
+            const data = content[type];
+            const modal = document.getElementById('infoModal');
+            let html = `<h2>${data.title}</h2>`;
+            
+            data.sections.forEach(sec => {
+                html += `
+                    <div class="section-block">
+                        <h3><span>${sec.id}</span> ${sec.name}</h3>
+                        ${sec.items.map(item => `
+                            <div class="info-row">
+                                <strong>${item.t}</strong>
+                                <p>${item.d}</p>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            });
+
+            modal.className = 'modal ' + data.class;
+            document.getElementById('modalBody').innerHTML = html;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
+        window.onclick = (e) => { if(e.target.className.includes('modal')) closeModal(); }
+    </script>
+</body>
+</html>
